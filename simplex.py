@@ -1,6 +1,7 @@
 import numpy as np
+import exceptions
 from utils import zeros, eye, ones
-from solution import Solution, Status
+from solution import Solution
 from contextlib import contextmanager
 import itertools
 
@@ -98,32 +99,30 @@ class Simplex(object):
         entering_var = self.startegy.find_entering(self.tableau, self._get_entering_candidates())
         constraint_index = self.startegy.find_leaving_constraint(self.tableau, entering_var)
         if constraint_index is None:
-            return Solution(Status.UNBOUNDED, self)
+            raise exceptions.SimplexProblemUnboundedError()
 
         leaving_var = self._tight_vars[constraint_index]
 
         self._change_base(entering_var, leaving_var)
-        return Solution(Status.SUCCESS, self)
 
     def _solve_phase(self):
         while not self._is_optimal_solution() and self.iterations_count < self._max_iterations:
             self.iterations_count += 1
-            result = self._optimize_solution()
-            if result.status != Status.SUCCESS:
-                return result
+            self._optimize_solution()
 
         if not self._is_optimal_solution() and self.iterations_count >= self._max_iterations:
-            return Solution(Status.ITERATIONS_LIMIT, self)
-        return Solution(Status.SUCCESS, self)
+            raise exceptions.SimplexIterationsLimitExceedError()
+
+        return Solution(self)
 
     def _solve_phase_steps(self):
         while not self._is_optimal_solution() and self.iterations_count < self._max_iterations:
             self.iterations_count += 1
             self._optimize_solution()
-            yield Solution(Status.SUCCESS, self)
+            yield Solution(self)
 
         if not self._is_optimal_solution() and self.iterations_count >= self._max_iterations:
-            yield Solution(Status.ITERATIONS_LIMIT, self)
+            raise exceptions.SimplexIterationsLimitExceedError()
     
     def _get_phase1_initial_leaving_var_info(self):
         constraint_index, free_var_value = max(
@@ -150,10 +149,10 @@ class Simplex(object):
     
     def _phase1(self):
         if self.iterations_count >= self._max_iterations:
-            return Solution(Status.ITERATIONS_LIMIT, self)
+            raise exceptions.SimplexIterationsLimitExceedError()
 
         if self._artificial_variables_count == 0:
-            return Solution(Status.SUCCESS, self)
+            return Solution(self)
 
         constraint_index, free_var_value = self._get_phase1_initial_leaving_var_info()
         if free_var_value <= 0:
@@ -167,20 +166,18 @@ class Simplex(object):
 
             # solve single phase normally
             result = self._solve_phase()
-            assert result.status !=  Status.UNBOUNDED, 'unbounded Phase One ???'
 
             if self.tableau[self._OBJECTIVE_ROW_INDEX, self._VARIABLES_FREE_VARIABLE_COL_INDEX] > 0:
-                result.status = Status.INFEASIBLE
+                raise exceptions.SimplexProblemInfeasibleError()
 
             return result
 
     def _phase1_steps(self):
         if self.iterations_count >= self._max_iterations:
-            yield Solution(Status.ITERATIONS_LIMIT, self)
-            return
+            raise exceptions.SimplexIterationsLimitExceedError()
 
         if self._artificial_variables_count == 0:
-            yield Solution(Status.SUCCESS, self)
+            yield Solution(self)
             return
 
         constraint_index, free_var_value = self._get_phase1_initial_leaving_var_info()
@@ -193,9 +190,9 @@ class Simplex(object):
             self._change_base_internal(-1, self._tight_vars[constraint_index])
             self.iterations_count += 1
             if self.iterations_count >= self._max_iterations:
-                yield Solution(Status.ITERATIONS_LIMIT, self)
-                return
-            yield Solution(Status.SUCCESS, self)
+                raise exceptions.SimplexIterationsLimitExceedError()
+
+            yield Solution(self)
 
             # solve single phase normally
             for solution in self._solve_phase_steps():
@@ -225,13 +222,10 @@ class Simplex(object):
                 got_solution = True
 
         if not got_solution:
-            yield Solution(Status.SUCCESS, self)
+            yield Solution(self)
 
     def solve(self):
-        result = self._phase1()
-        if result.status != Status.SUCCESS:
-            return result
-        
+        self._phase1()
         return self._phase2()
 
     def solution_steps(self):

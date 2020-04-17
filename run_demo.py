@@ -1,3 +1,4 @@
+import exceptions
 import linear_program
 from simplex_plotter import KleeMintyPlotter
 import strategy
@@ -36,13 +37,18 @@ def unbounded():
 ##################################################
 
 def shows_steps():
-    obj_func, cons_lhs, cons_rhs = klee_minty2()
-    lp = linear_program.StandardLinearProgram(obj_func, cons_lhs, cons_rhs)
-    print(lp.solve_simplex(max_iterations=10))
+    try:
+        obj_func, cons_lhs, cons_rhs = basic()
+        lp = linear_program.StandardLinearProgram(obj_func, cons_lhs, cons_rhs)
+        print(lp.solve_simplex(max_iterations=10))
+    except exceptions.SimplexError as e:
+        print(e)
     # for sol in lp.solve_simplex_steps(pivot_strategy=strategy.MaxCoefficientStrategy()):
     #    print(sol)
 
 def main():
+    # shows_steps()
+
     plotter = KleeMintyPlotter.create()
     plotter.demo()
     plotter = KleeMintyPlotter.create()

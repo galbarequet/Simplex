@@ -9,10 +9,10 @@ class StandardLinearProgram(object):
         self.constraints_count = len(righthand_side)
         self.variables_count = lefthand_side.shape[1]
 
-    def solve_simplex(self, strategy=None, max_iterations=1000):
-        if strategy is None:
-            strategy = strategy.MaxCoefficientStrategy()
-        solver = Simplex(self, strategy, max_iterations)
+    def solve_simplex(self, pivot_strategy=None, max_iterations=1000):
+        if pivot_strategy is None:
+            pivot_strategy = strategy.MaxCoefficientStrategy()
+        solver = Simplex(self, pivot_strategy, max_iterations)
         return solver.solve()
 
     def solve_simplex_steps(self, pivot_strategy=None, max_iterations=1000):
