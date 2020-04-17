@@ -39,13 +39,6 @@ class Simplex(object):
 
         if not self._is_optimal_solution() and tableau.pivots_count >= self._max_iterations:
             raise exceptions.SimplexIterationsLimitExceedError()
-    
-    def _get_phase1_initial_leaving_var_info(self):
-        constraint_index, free_var_value = max(
-            [(i + self._CONSTRAINT_ROW_START_INDEX, v) for (i, v) in 
-                enumerate(self.tableau[self._CONSTRAINT_ROW_START_INDEX:, self._VARIABLES_FREE_VARIABLE_COL_INDEX])],
-            key=lambda x: x[1])
-        return constraint_index, free_var_value
 
     def _phase1(self, tableau):
         if tableau.pivots_count >= self._max_iterations:
@@ -54,20 +47,20 @@ class Simplex(object):
         if not tableau.should_initialize:
             return
 
-        constraint_index, free_var_value = self._get_phase1_initial_leaving_var_info()
+        leaving_var, free_var_value = tableau.get_most_infeasible_basic_variable_info()
         if free_var_value <= 0:
             # nothing to do
             return
         
         with tableau.use_artificial_argument():
             # perfrom first mandatory pivot
-            # CR: (GB) use regular change base!            
-            tableau._change_base_internal(-1, tableau.get_variable_representing_constraint(constraint_index))
+            # CR: (GB) use regular change base!
+            tableau._change_base_internal(-1, leaving_var)
 
             # solve single phase normally
-            self._solve_phase()
+            self._solve_phase(tableau)
 
-            if self.tableau[self._OBJECTIVE_ROW_INDEX, self._VARIABLES_FREE_VARIABLE_COL_INDEX] > 0:
+            if tableau.get_objective_function_coefficients()[0] > 0:
                 raise exceptions.SimplexProblemInfeasibleError()
 
     def _phase1_steps(self):
@@ -78,7 +71,7 @@ class Simplex(object):
             yield Solution(self)
             return
 
-        constraint_index, free_var_value = self._get_phase1_initial_leaving_var_info()
+        leaving_var, free_var_value = tableau.get_most_infeasible_basic_variable_info()
         if free_var_value <= 0:
             # nothing to do
             return
@@ -86,7 +79,7 @@ class Simplex(object):
         with tableau.use_artificial_argument():
             # perfrom first mandatory pivot
             # CR: (GB) use regular change base!
-            tableau._change_base_internal(-1, tableau.get_variable_representing_constraint(constraint_index))
+            tableau._change_base_internal(-1, leaving_var)
 
             if tableau.pivots_count >= self._max_iterations:
                 raise exceptions.SimplexIterationsLimitExceedError()

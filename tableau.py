@@ -168,3 +168,12 @@ class tableau(object):
             self._tableau[self._OBJECTIVE_ROW_INDEX] -= (
                 (self._tableau[self._OBJECTIVE_ROW_INDEX, variable] / self._tableau[pivot, variable]) * self._tableau[pivot])
 
+    def get_most_infeasible_basic_variable_info(self):
+        constraint_index, free_var_value = max(
+            [(i + self._CONSTRAINT_ROW_START_INDEX, v) for (i, v) in 
+                enumerate(self._tableau[self._CONSTRAINT_ROW_START_INDEX:, self._VARIABLES_FREE_VARIABLE_COL_INDEX])],
+            key=lambda x: x[1])
+        
+        basic_var_index = self.get_variable_representing_constraint(constraint_index)
+
+        return basic_var_index, free_var_value

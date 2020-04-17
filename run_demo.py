@@ -38,7 +38,7 @@ def unbounded():
 
 def shows_steps():
     try:
-        obj_func, cons_lhs, cons_rhs = basic()
+        obj_func, cons_lhs, cons_rhs = need_init()
         lp = linear_program.StandardLinearProgram(obj_func, cons_lhs, cons_rhs)
         print(linear_program.LinearProgramSolver.solve_simplex(lp, max_iterations=10))
     except exceptions.SimplexError as e:
