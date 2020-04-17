@@ -4,7 +4,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import linear_program
 from utils import zeros, array
-import strategy
 
 class Simplex3DPlotter(object):
     def __init__(self, linear_program, planes, colors, scale):
@@ -12,6 +11,7 @@ class Simplex3DPlotter(object):
         self._previous_point = None
 
         assert scale.shape == (3, 2), 'scale must be a 3x2 matrix'
+        assert len(planes) == len(colors), 'planes and colors must be of same length'
 
         fig = plt.figure()
         ax = Axes3D(fig)
@@ -39,7 +39,7 @@ class Simplex3DPlotter(object):
                 ax.plot(line_x, line_y, line_z, color='black', linewidth=10)
 
             x, y, z = sol.solution
-            ax.scatter(x, y, z, c='r', marker='o')
+            ax.scatter(x, y, z, c='r', marker='o', s=64)
             plt.draw()
             self._previous_point = sol.solution
             input('Hit enter for next step')
@@ -82,9 +82,3 @@ class KleeMintyPlotter(Simplex3DPlotter):
         constraint_rhs = array([5, 25, 125])
         lp = linear_program.StandardLinearProgram(objective_func, constraint_lhs, constraint_rhs)
         return lp
-
-if __name__ == '__main__':
-    plotter = KleeMintyPlotter.create()
-    plotter.demo()
-    plotter = KleeMintyPlotter.create()
-    plotter.demo(pivot_strategy=strategy.MinCoefficientStrategy())
