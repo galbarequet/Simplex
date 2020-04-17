@@ -10,6 +10,7 @@ class StandardLinearProgram(object):
         self.constraints_count = len(righthand_side)
         self.variables_count = lefthand_side.shape[1]
 
+
 class LinearProgramSolver(object):
     DEFAULT_MAX_ITERATIONS_COUNT = 1000
 

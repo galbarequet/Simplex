@@ -4,6 +4,7 @@ class Strategy(object):
     def find_leaving(self, tableau, entering_variable):
         raise NotImplementedError()
 
+
 class RatioTestStrategy(Strategy):
     def _find_leaving_constraint(self, tableau, entering_variable):
         """

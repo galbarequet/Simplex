@@ -1,7 +1,3 @@
-from utils import zeros
-from enum import IntEnum
-
-
 class Solution(object):
     def __init__(self, tableau, pivot_strategy):
         self.solution = tableau.get_current_solution()
