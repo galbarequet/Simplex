@@ -2,7 +2,7 @@ import exceptions
 import linear_program
 from simplex_plotter import KleeMintyPlotter
 import strategy
-from utils import zeros, array
+from utils import array
 
 ############ LP parameters creators ##############
 def basic():
@@ -45,7 +45,6 @@ def shows_steps():
         #     print(sol)
     except exceptions.SimplexError as e:
         print(e)
-    
 
 def main():
     # shows_steps()

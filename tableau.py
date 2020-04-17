@@ -49,7 +49,7 @@ class tableau(object):
         # righthand-side:
         self._tableau[self._CONSTRAINT_ROW_START_INDEX:, self._VARIABLES_FREE_VARIABLE_COL_INDEX] = linear_program.righthand_side * -1
 
-        # initially all slack variables are basic ones
+        # initially all slack variables are basic
         self._basic_vars = np.zeros((self._variables_count + 1,), dtype='int')  # including free variable, unused and should always be 0
         self._basic_vars[slack_start_index: slack_start_index + self._constraints_count] = range(1, self._constraints_count + 1)
         self._tight_vars = np.array(range(self._real_variables_count, self._variables_count + 1), dtype='int')
@@ -92,14 +92,14 @@ class tableau(object):
             self._tableau[row_index] -= self._tableau[row_index, pivot_col_index] * self._tableau[pivot_row_index]
 
         self.pivots_count += 1
-    
+
     def _change_base_internal(self, entering_var, leaving_var):
         self._perform_pivot(self._basic_vars[leaving_var], entering_var)
 
         self._basic_vars[entering_var] = self._basic_vars[leaving_var]
         self._tight_vars[self._basic_vars[leaving_var]] = entering_var
         self._basic_vars[leaving_var] = 0
-     
+
     def change_base(self, entering_var, leaving_var, is_forced_initialize=False):
         if is_forced_initialize and not self._using_artificial_variable:
             raise exceptions.SimplexError("Can't force initialization without artificial variables!")
@@ -173,7 +173,7 @@ class tableau(object):
             [(i + self._CONSTRAINT_ROW_START_INDEX, v) for (i, v) in 
                 enumerate(self._tableau[self._CONSTRAINT_ROW_START_INDEX:, self._VARIABLES_FREE_VARIABLE_COL_INDEX])],
             key=lambda x: x[1])
-        
+
         basic_var_index = self.get_variable_representing_constraint(constraint_index)
 
         return basic_var_index, free_var_value

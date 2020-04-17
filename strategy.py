@@ -1,5 +1,3 @@
-import simplex
-
 class Strategy(object):
     def find_entering(self, tableau):
         raise NotImplementedError()

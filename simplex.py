@@ -43,7 +43,7 @@ class Simplex(object):
         if free_var_value <= 0:
             # nothing to do
             return
-        
+
         with tableau.use_artificial_argument():
             # perfrom first mandatory pivot
             # CR: (GB) use regular change base!

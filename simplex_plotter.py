@@ -1,9 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import linear_program
-from utils import zeros, array
+import numpy as np
+from utils import array
 
 class Simplex3DPlotter(object):
     def __init__(self, linear_program, planes, colors, scale):
@@ -18,7 +18,7 @@ class Simplex3DPlotter(object):
         axes_lim_setters = [ax.set_xlim3d, ax.set_ylim3d, ax.set_zlim3d]
         for lim_setter, (left, right) in zip(axes_lim_setters, scale):
             lim_setter(left, right)
-        
+
         axes_label_setters = [ax.set_xlabel, ax.set_ylabel, ax.set_zlabel]
         for label_setter, letter in zip(axes_label_setters, ['X', 'Y', 'Z']):
             label_setter(f'{letter} Axis')
@@ -27,7 +27,7 @@ class Simplex3DPlotter(object):
             face = Poly3DCollection([plane])
             face.set_color(color)
             ax.add_collection3d(face)
-        
+
         plt.show(block=False)
 
     def demo(self, pivot_strategy=None):
@@ -45,7 +45,7 @@ class Simplex3DPlotter(object):
             input('Hit enter for next step')
 
         plt.show()
-            
+
 
 class KleeMintyPlotter(Simplex3DPlotter):
     @staticmethod
