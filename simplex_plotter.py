@@ -32,7 +32,7 @@ class Simplex3DPlotter(object):
 
     def demo(self, pivot_strategy=None):
         ax = plt.gca()
-        for sol in self._linear_program.solve_simplex_steps(pivot_strategy=pivot_strategy):
+        for sol in linear_program.LinearProgramSolver.solve_simplex_steps(self._linear_program, pivot_strategy=pivot_strategy):
             print(sol)
             if self._previous_point is not None:
                 line_x, line_y, line_z = ([p1, p2] for (p1, p2) in zip(self._previous_point, sol.solution))

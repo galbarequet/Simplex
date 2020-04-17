@@ -41,18 +41,19 @@ def shows_steps():
         obj_func, cons_lhs, cons_rhs = need_init()
         lp = linear_program.StandardLinearProgram(obj_func, cons_lhs, cons_rhs)
         print(linear_program.LinearProgramSolver.solve_simplex(lp, max_iterations=10))
+        # for sol in linear_program.LinearProgramSolver.solve_simplex_steps(lp, pivot_strategy=strategy.MaxCoefficientStrategy()):
+        #     print(sol)
     except exceptions.SimplexError as e:
         print(e)
-    # for sol in linear_program.LinearProgramSolver.solve_simplex_steps(lp, pivot_strategy=strategy.MaxCoefficientStrategy()):
-    #    print(sol)
+    
 
 def main():
-    shows_steps()
+    # shows_steps()
 
-    # plotter = KleeMintyPlotter.create()
-    # plotter.demo()
-    # plotter = KleeMintyPlotter.create()
-    # plotter.demo(pivot_strategy=strategy.MinCoefficientStrategy())
+    plotter = KleeMintyPlotter.create()
+    plotter.demo()
+    plotter = KleeMintyPlotter.create()
+    plotter.demo(pivot_strategy=strategy.MinCoefficientStrategy())
 
 
 if __name__ == '__main__':
