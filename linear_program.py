@@ -9,10 +9,10 @@ class StandardLinearProgram(object):
         self.constraints_count = len(righthand_side)
         self.variables_count = lefthand_side.shape[1]
 
-    def solve_simplex(self, startegy=None):
+    def solve_simplex(self, startegy=None, max_iterations=1000):
         if startegy is None:
             startegy = strategy.MaxCoefficientStrategy()
-        solver = Simplex(self, startegy)
+        solver = Simplex(self, startegy, max_iterations)
         return solver.solve()
 
     def solve_simplex_steps(self, startegy=None):
@@ -49,8 +49,8 @@ if __name__ == '__main__':
         constraint_rhs = array([5, 7, 0])
         return objective_func, constraint_lhs, constraint_rhs
 
-    obj_func, cons_lhs, cons_rhs = unbounded()
+    obj_func, cons_lhs, cons_rhs = need_init()
     lp = StandardLinearProgram(obj_func, cons_lhs, cons_rhs)
-    print(lp.solve_simplex())
+    print(lp.solve_simplex(max_iterations=10))
     # for sol in lp.solve_simplex_steps():
     #    print(sol)

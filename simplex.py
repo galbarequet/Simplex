@@ -1,6 +1,6 @@
 import numpy as np
-from utils import Status, zeros, eye, ones
-from solution import Solution
+from utils import zeros, eye, ones
+from solution import Solution, Status
 from contextlib import contextmanager
 import itertools
 
@@ -24,13 +24,15 @@ class Simplex(object):
     _VARIABLES_FREE_VARIABLE_COL_INDEX = 0
     _VARIABLES_COL_START_INDEX = 1
 
-    def __init__(self, linear_program, strategy):
+    def __init__(self, linear_program, strategy, max_iterations):
         self.startegy = strategy
         self._objective_function = linear_program.objective_function
         self.constraints_count = linear_program.constraints_count
         self.real_variables_count = linear_program.variables_count
         self._artificial_variables_count = 0
         self._variables_count = self.constraints_count + self.real_variables_count
+        self._max_iterations = max_iterations
+        self.iterations_count = 0
 
         if min(linear_program.righthand_side) < 0:
             self._artificial_variables_count += 1
@@ -101,19 +103,27 @@ class Simplex(object):
         leaving_var = self._tight_vars[constraint_index]
 
         self._change_base(entering_var, leaving_var)
+        return Solution(Status.SUCCESS, self)
 
     def _solve_phase(self):
-        while not self._is_optimal_solution():
+        while not self._is_optimal_solution() and self.iterations_count < self._max_iterations:
+            self.iterations_count += 1
             result = self._optimize_solution()
             if result.status != Status.SUCCESS:
                 return result
 
+        if not self._is_optimal_solution() and self.iterations_count >= self._max_iterations:
+            return Solution(Status.ITERATIONS_LIMIT, self)
         return Solution(Status.SUCCESS, self)
 
     def _solve_phase_steps(self):
-        while not self._is_optimal_solution():
+        while not self._is_optimal_solution() and self.iterations_count < self._max_iterations:
+            self.iterations_count += 1
             self._optimize_solution()
             yield Solution(Status.SUCCESS, self)
+
+        if not self._is_optimal_solution() and self.iterations_count >= self._max_iterations:
+            yield Solution(Status.ITERATIONS_LIMIT, self)
     
     def _get_phase1_initial_leaving_var_info(self):
         constraint_index, free_var_value = max(
@@ -139,6 +149,9 @@ class Simplex(object):
         self._variables_count -= 1
     
     def _phase1(self):
+        if self.iterations_count >= self._max_iterations:
+            return Solution(Status.ITERATIONS_LIMIT, self)
+
         if self._artificial_variables_count == 0:
             return Solution(Status.SUCCESS, self)
 
@@ -150,6 +163,7 @@ class Simplex(object):
         with self._artificial_argument():
             # perfrom first mandatory pivot
             self._change_base_internal(-1, self._tight_vars[constraint_index])
+            self.iterations_count += 1
 
             # solve single phase normally
             result = self._solve_phase()
@@ -157,11 +171,14 @@ class Simplex(object):
 
             if self.tableau[self._OBJECTIVE_ROW_INDEX, self._VARIABLES_FREE_VARIABLE_COL_INDEX] > 0:
                 result.status = Status.INFEASIBLE
-                return result
 
-        return result
+            return result
 
     def _phase1_steps(self):
+        if self.iterations_count >= self._max_iterations:
+            yield Solution(Status.ITERATIONS_LIMIT, self)
+            return
+
         if self._artificial_variables_count == 0:
             yield Solution(Status.SUCCESS, self)
             return
@@ -174,11 +191,15 @@ class Simplex(object):
         with self._artificial_argument():
             # perfrom first mandatory pivot
             self._change_base_internal(-1, self._tight_vars[constraint_index])
+            self.iterations_count += 1
+            if self.iterations_count >= self._max_iterations:
+                yield Solution(Status.ITERATIONS_LIMIT, self)
+                return
             yield Solution(Status.SUCCESS, self)
 
             # solve single phase normally
-            for sol in self._solve_phase_steps():
-                yield sol
+            for solution in self._solve_phase_steps():
+                yield solution
 
     def _use_objective_function(self):
         self.tableau[self._OBJECTIVE_ROW_INDEX, self._VARIABLES_COL_START_INDEX: self.real_variables_count + 1] = self._objective_function
@@ -197,9 +218,14 @@ class Simplex(object):
 
     def _phase2_steps(self):
         self._use_objective_function()
-        for sol in self._solve_phase_steps():
-            yield sol
-        yield Solution(Status.SUCCESS, self)
+        got_solution = False
+        for solution in self._solve_phase_steps():
+            yield solution
+            if not got_solution:
+                got_solution = True
+
+        if not got_solution:
+            yield Solution(Status.SUCCESS, self)
 
     def solve(self):
         result = self._phase1()
