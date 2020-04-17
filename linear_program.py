@@ -15,10 +15,10 @@ class StandardLinearProgram(object):
         solver = Simplex(self, startegy, max_iterations)
         return solver.solve()
 
-    def solve_simplex_steps(self, startegy=None):
+    def solve_simplex_steps(self, startegy=None, max_iterations=1000):
         if startegy is None:
             startegy = strategy.MaxCoefficientStrategy()
-        solver = Simplex(self, startegy)
+        solver = Simplex(self, startegy, max_iterations)
         return solver.solution_steps()
 
 
