@@ -93,23 +93,15 @@ class tableau(object):
 
         self.pivots_count += 1
 
-    def _change_base_internal(self, entering_var, leaving_var):
+    def change_base(self, entering_var, leaving_var):
+        assert self._basic_vars[entering_var] == 0, 'entering variable must be non-basic'
+        assert self._basic_vars[leaving_var] != 0, 'leaving variable must be basic'
+
         self._perform_pivot(self._basic_vars[leaving_var], entering_var)
 
         self._basic_vars[entering_var] = self._basic_vars[leaving_var]
         self._tight_vars[self._basic_vars[leaving_var]] = entering_var
         self._basic_vars[leaving_var] = 0
-
-    def change_base(self, entering_var, leaving_var, is_forced_initialize=False):
-        if is_forced_initialize and not self._using_artificial_variable:
-            raise exceptions.SimplexError("Can't force initialization without artificial variables!")
-
-        # Note: in the first initialization step the artificial variables is entering but do
-        #if not is_forced_initialize or not self._using_artificial_variable or (entering_var != -1 and entering_var != ):
-        assert self._basic_vars[entering_var] == 0, 'entering variable must be non-basic'
-        assert self._basic_vars[leaving_var] != 0, 'leaving variable must be basic'
-
-        self._change_base_internal(entering_var, leaving_var)
 
     def get_current_solution(self):
         solution = zeros(self._real_variables_count)

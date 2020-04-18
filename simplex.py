@@ -46,8 +46,7 @@ class Simplex(object):
 
         with tableau.use_artificial_argument():
             # perfrom first mandatory pivot
-            # CR: (GB) use regular change base!
-            tableau._change_base_internal(-1, leaving_var)
+            tableau.change_base(-1, leaving_var)
 
             if tableau.pivots_count >= self._max_iterations:
                 raise exceptions.SimplexIterationsLimitExceedError()
