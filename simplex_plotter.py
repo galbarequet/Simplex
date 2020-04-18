@@ -6,7 +6,12 @@ import numpy as np
 import utils
 
 class Simplex3DPlotter(object):
-    def __init__(self, linear_program, planes, colors, scale):
+    DEFAULT_EDGE_COLOR = 'midnightblue'
+
+    def __init__(self, linear_program, planes, colors, scale, edgecolor=None):
+        if edgecolor is None:
+            edgecolor = self.DEFAULT_EDGE_COLOR
+
         self._linear_program = linear_program
         self._previous_point = None
         self._direction = utils.ones(3)
@@ -27,6 +32,7 @@ class Simplex3DPlotter(object):
         for plane, color in zip(planes, colors):
             face = Poly3DCollection([plane], alpha=0.5)
             face.set_color(color)
+            face.set_edgecolor(edgecolor)
             ax.add_collection3d(face)
 
         plt.show(block=False)
