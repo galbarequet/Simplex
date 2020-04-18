@@ -49,9 +49,9 @@ def shows_steps():
 def main():
     # shows_steps()
 
-    plotter = KleeMintyPlotter.create()
+    plotter = KleeMintyPlotter()
     plotter.demo()
-    plotter = KleeMintyPlotter.create()
+    plotter = KleeMintyPlotter()
     plotter.demo(pivot_strategy=strategy.MinCoefficientStrategy())
 
 

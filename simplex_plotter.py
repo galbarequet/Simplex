@@ -1,14 +1,15 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-import linear_program
+from linear_program import LinearProgramSolver, StandardLinearProgram
 import numpy as np
-from utils import array
+import utils
 
 class Simplex3DPlotter(object):
     def __init__(self, linear_program, planes, colors, scale):
         self._linear_program = linear_program
         self._previous_point = None
+        self._direction = utils.ones(3)
 
         assert scale.shape == (3, 2), 'scale must be a 3x2 matrix'
         assert len(planes) == len(colors), 'planes and colors must be of same length'
@@ -31,26 +32,52 @@ class Simplex3DPlotter(object):
         plt.show(block=False)
 
     def demo(self, pivot_strategy=None):
+        gotOptimal = False
         ax = plt.gca()
-        for sol in linear_program.LinearProgramSolver.solve_simplex_steps(self._linear_program, pivot_strategy=pivot_strategy):
+        for sol, is_last in utils.items_final_indicator(LinearProgramSolver.solve_simplex_steps(self._linear_program, pivot_strategy=pivot_strategy)):
             print(sol)
             if self._previous_point is not None:
                 line_x, line_y, line_z = ([p1, p2] for (p1, p2) in zip(self._previous_point, sol.solution))
                 ax.plot(line_x, line_y, line_z, color='black', linewidth=10)
 
+                for i in range(len(sol.solution)):
+                    self._direction[i] *= 1 if sol.solution[i] > self._previous_point[i] else -1
+
             x, y, z = sol.solution
             ax.scatter(x, y, z, c='r', marker='o', s=64)
             plt.draw()
             self._previous_point = sol.solution
-            input('Hit enter for next step')
+
+            if not is_last:
+                input('Hit enter for next step: ')
+            else:
+                x, y, z = self._previous_point + self._direction
+                ax.text(x, y, z, 'OPTIMAL', color='black')
 
         plt.show()
 
 
 class KleeMintyPlotter(Simplex3DPlotter):
+    def __init__(self):
+        super().__init__(
+            KleeMintyPlotter._generate_linear_program(),
+            KleeMintyPlotter._generate_planes(),
+            KleeMintyPlotter._generate_colors(),
+            KleeMintyPlotter._generate_scale())
+        fig = plt.gcf()
+        fig.canvas.set_window_title('Klee-Minty 3D-Cube')
+
     @staticmethod
-    def create():
-        planes = np.array([
+    def _generate_linear_program():
+        objective_func = utils.array([4, 2, 1])
+        constraint_lhs = utils.array([[1, 0, 0], [4, 1, 0], [8, 4, 1]])
+        constraint_rhs = utils.array([5, 25, 125])
+        lp = StandardLinearProgram(objective_func, constraint_lhs, constraint_rhs)
+        return lp
+
+    @staticmethod
+    def _generate_planes():
+        return np.array([
             # bottom x=0
             [(0, 0, 0), (0, 25, 0), (0, 25, 25), (0, 0, 125)],
             # y=0
@@ -64,7 +91,10 @@ class KleeMintyPlotter(Simplex3DPlotter):
             # side: x=5
             [(0, 25, 0), (0, 25, 25), (5, 5, 65), (5, 5, 0)],
         ])
-        colors = np.array([
+
+    @staticmethod
+    def _generate_colors():
+        return np.array([
             'darkgrey',
             'skyblue',
             'deepskyblue',
@@ -72,13 +102,7 @@ class KleeMintyPlotter(Simplex3DPlotter):
             'turquoise',
             'aqua'
         ])
-        scale = np.array([[0, 5], [0, 25], [0, 125]])
-        return Simplex3DPlotter(KleeMintyPlotter._generate_linear_program(), planes, colors, scale)
 
     @staticmethod
-    def _generate_linear_program():
-        objective_func = array([4, 2, 1])
-        constraint_lhs = array([[1, 0, 0], [4, 1, 0], [8, 4, 1]])
-        constraint_rhs = array([5, 25, 125])
-        lp = linear_program.StandardLinearProgram(objective_func, constraint_lhs, constraint_rhs)
-        return lp
+    def _generate_scale():
+        return np.array([[0, 5], [0, 25], [0, 125]])
