@@ -1,5 +1,10 @@
 # Simplex
 My implementation of the Simplex Method for Advanced Seminar in Applied Mathematics at TAU.
+Maximum Simplex Iterations             |  Minimum Simplex Iterations
+:-------------------------:|:-------------------------:
+![](demos/demo_max.gif)  |  ![](demos/demo_min.gif)
+
+
 
 ## Prerequisites + Dependencies
 This program runs on python3.
