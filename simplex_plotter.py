@@ -60,7 +60,8 @@ class Simplex3DPlotter(object):
                 x, y, z = self._previous_point + self._direction
                 ax.text(x, y, z, 'OPTIMAL', color='black')
 
-        plt.show()
+        input('Hit enter to close window: ')
+        plt.close(plt.gcf())
 
 
 class KleeMintyPlotter(Simplex3DPlotter):
