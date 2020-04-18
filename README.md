@@ -17,3 +17,6 @@ Run demo with the following command:
 ```bash
 $ py ./run_demo.py
 ```
+
+## Author
+* [Gal Barequet](https://github.com/galbarequet)
