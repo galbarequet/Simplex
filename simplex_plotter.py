@@ -24,7 +24,7 @@ class Simplex3DPlotter(object):
             label_setter(f'{letter} Axis')
 
         for plane, color in zip(planes, colors):
-transparency            face = Poly3DCollection([plane], alpha=0.5)
+            face = Poly3DCollection([plane], alpha=0.5)
             face.set_color(color)
             ax.add_collection3d(face)
 
