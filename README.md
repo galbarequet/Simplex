@@ -13,8 +13,7 @@ $ pip install numpy matplotlib
 ```
 
 ## Usage
-Install pyEnigma system wide with pipx:
-
+Run demo with the following command:
 ```bash
 $ py ./run_demo.py
 ```
