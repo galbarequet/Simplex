@@ -35,6 +35,8 @@ class Simplex3DPlotter(object):
             face.set_edgecolor(edgecolor)
             ax.add_collection3d(face)
 
+        im = ax.view_init(20, 30)
+
         plt.show(block=False)
 
     def demo(self, pivot_strategy=None):
